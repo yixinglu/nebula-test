@@ -1,4 +1,4 @@
-package parser
+package nebula_test
 
 import (
 	"bufio"
@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+
+	nebula "github.com/vesoft-inc/nebula-go"
 )
 
 const (
@@ -16,7 +18,7 @@ const (
 	outPrefix  = "--- out"
 )
 
-func ReadFile(filename string) error {
+func Parse(filename string, client *nebula.GraphClient, nebulaConf *NebulaConfig) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -48,7 +50,10 @@ func ReadFile(filename string) error {
 			isOutput = true
 
 			if isInput {
-				respResult = request(inBuf.String())
+				respResult, err = request(inBuf.String(), client, nebulaConf)
+				if err != nil {
+					return err
+				}
 				isInput = false
 				inBuf.Reset()
 			}
@@ -71,11 +76,18 @@ func ReadFile(filename string) error {
 	return nil
 }
 
-// TODO(yee): connect nebula server and send gpl stmt
-func request(gql string) string {
+func request(gql string, client *nebula.GraphClient, nebulaConf *NebulaConfig) (string, error) {
 	gql = strings.TrimSpace(gql)
-	// log.Println(gql)
-	return ""
+	authResp, err := client.Authenticate(nebulaConf.NebulaTestUser, nebulaConf.NebulaTestPassword)
+	if err != nil {
+		return "", err
+	}
+	resp, err := client.Execute(*authResp.SessionID, gql)
+	if err != nil {
+		return "", err
+	}
+	// TODO(yee): return response results
+	return resp.String(), nil
 }
 
 // TODO(yee): diff output result and response result

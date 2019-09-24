@@ -1,0 +1,4 @@
+github.com/facebook/fbthrift v0.0.0-20190922225929-2f9839604e25 h1:dezRDs9oGYxeavyvcNg/Js+dK6kIvfzERoJ7K8Xkv14=
+github.com/facebook/fbthrift v0.0.0-20190922225929-2f9839604e25/go.mod h1:2tncLx5rmw69e5kMBv/yJneERbzrr1yr5fdlnTbu8lU=
+github.com/vesoft-inc/nebula-go v0.0.0-20190924121016-6f5104802197 h1:m/Q+DvzwyiSWQ0ZIEXk1dZqjBvPu/A281fkIlJ1dC40=
+github.com/vesoft-inc/nebula-go v0.0.0-20190924121016-6f5104802197/go.mod h1:sZwaFK3Cz1F1Pas/ZjLzVDEFcTNXYENKur89XYP0nbA=
