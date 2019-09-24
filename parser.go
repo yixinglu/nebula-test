@@ -50,8 +50,7 @@ func Parse(filename string, client *nebula.GraphClient, nebulaConf *NebulaConfig
 			isOutput = true
 
 			if isInput {
-				respResult, err = request(inBuf.String(), client, nebulaConf)
-				if err != nil {
+				if respResult, err = request(inBuf.String(), client, nebulaConf); err != nil {
 					return err
 				}
 				isInput = false

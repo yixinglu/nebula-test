@@ -1,4 +1,4 @@
-package nebula_test
+package main
 
 import (
 	"flag"
@@ -6,12 +6,8 @@ import (
 	"log"
 
 	nebula "github.com/vesoft-inc/nebula-go"
+	nt "github.com/vesoft-inc/nebula-test"
 )
-
-type NebulaConfig struct {
-	NebulaTestUser     string
-	NebulaTestPassword string
-}
 
 func main() {
 	filename := flag.String("filename", "", "Test filename")
@@ -26,23 +22,22 @@ func main() {
 		return
 	}
 
-	client, err := nebula.NewClient(fmt.Sprintf("%s:%d", address, port))
+	client, err := nebula.NewClient(fmt.Sprintf("%s:%d", *address, *port))
 	if err != nil {
 		panic(err)
 	}
-	err = client.Open()
-	if err != nil {
+
+	if err = client.Open(); err != nil {
 		panic(err)
 	}
 	defer client.Close()
 
-	nebulaConf := NebulaConfig{
+	nebulaConf := nt.NebulaConfig{
 		NebulaTestUser:     *username,
 		NebulaTestPassword: *password,
 	}
 
-	err = Parse(*filename, client, &nebulaConf)
-	if err != nil {
+	if err = nt.Parse(*filename, client, &nebulaConf); err != nil {
 		panic(err)
 	}
 }
