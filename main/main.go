@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/vesoft/nebula-test/parser"
+	"github.com/vesoft-inc/nebula-test/parser"
 )
 
 func main() {
