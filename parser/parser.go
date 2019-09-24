@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+const (
+	testPrefix = "=== test:"
+	inPrefix   = "--- in"
+	outPrefix  = "--- out"
+)
+
 func ReadFile(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -21,11 +27,6 @@ func ReadFile(filename string) error {
 	var inBuf, outBuf bytes.Buffer
 	var respResult, testName string
 	isInput, isOutput := false, false
-	const (
-		testPrefix = "=== test:"
-		inPrefix   = "--- in"
-		outPrefix  = "--- out"
-	)
 	for scanner.Scan() {
 		text := scanner.Text()
 		if strings.HasPrefix(text, testPrefix) {
@@ -47,7 +48,7 @@ func ReadFile(filename string) error {
 			isOutput = true
 
 			if isInput {
-				request(inBuf.String())
+				respResult = request(inBuf.String())
 				isInput = false
 				inBuf.Reset()
 			}
@@ -71,9 +72,10 @@ func ReadFile(filename string) error {
 }
 
 // TODO(yee): connect nebula server and send gpl stmt
-func request(gql string) {
+func request(gql string) string {
 	gql = strings.TrimSpace(gql)
-	log.Println(gql)
+	// log.Println(gql)
+	return ""
 }
 
 // TODO(yee): diff output result and response result
