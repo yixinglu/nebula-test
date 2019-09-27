@@ -6,7 +6,7 @@ import (
 	"log"
 
 	nebula "github.com/vesoft-inc/nebula-go"
-	nt "github.com/vesoft-inc/nebula-test"
+	nt "github.com/vesoft-inc/nebula-test/nebulatest"
 )
 
 func main() {

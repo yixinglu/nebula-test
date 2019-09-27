@@ -1,4 +1,4 @@
-package nebula_test
+package nebulatest
 
 type NebulaConfig struct {
 	NebulaTestUser     string

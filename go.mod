@@ -1,3 +1,3 @@
 module github.com/vesoft-inc/nebula-test
 
-require github.com/vesoft-inc/nebula-go v0.0.0-20190924121016-6f5104802197
+require github.com/vesoft-inc/nebula-go v0.0.0-20190925005839-9f949b7e86e8
