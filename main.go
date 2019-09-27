@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	nebula "github.com/vesoft-inc/nebula-go"
+	"github.com/vesoft-inc/nebula-go/nebula"
 	nt "github.com/vesoft-inc/nebula-test/nebulatest"
 )
 
@@ -27,17 +27,12 @@ func main() {
 		panic(err)
 	}
 
-	if err = client.Open(); err != nil {
+	if err = client.Connect(username, password); err != nil {
 		panic(err)
 	}
-	defer client.Close()
+	defer client.Disconnect()
 
-	nebulaConf := nt.NebulaConfig{
-		NebulaTestUser:     *username,
-		NebulaTestPassword: *password,
-	}
-
-	if err = nt.Parse(*filename, client, &nebulaConf); err != nil {
+	if err = nt.Parse(*filename, client); err != nil {
 		panic(err)
 	}
 }

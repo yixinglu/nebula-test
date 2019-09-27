@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	nebula "github.com/vesoft-inc/nebula-go"
+	"github.com/vesoft-inc/nebula-go/nebula"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 	outPrefix  = "--- out"
 )
 
-func Parse(filename string, client *nebula.GraphClient, nebulaConf *NebulaConfig) error {
+func Parse(filename string, client *nebula.GraphClient) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func Parse(filename string, client *nebula.GraphClient, nebulaConf *NebulaConfig
 			isOutput = true
 
 			if isInput {
-				if respResult, err = request(inBuf.String(), client, nebulaConf); err != nil {
+				if respResult, err = request(inBuf.String(), client); err != nil {
 					return err
 				}
 				isInput = false
@@ -75,26 +75,20 @@ func Parse(filename string, client *nebula.GraphClient, nebulaConf *NebulaConfig
 	return nil
 }
 
-func request(gql string, client *nebula.GraphClient, nebulaConf *NebulaConfig) (string, error) {
+func request(gql string, client *nebula.GraphClient) (string, error) {
 	gql = strings.TrimSpace(gql)
-	authResp, err := client.Authenticate(nebulaConf.NebulaTestUser, nebulaConf.NebulaTestPassword)
+	resp, err := client.Execute(gql)
 	if err != nil {
 		return "", err
 	}
-	resp, err := client.Execute(*authResp.SessionID, gql)
-	if err != nil {
-		return "", err
-	}
-	// TODO(yee): return response results
-	return resp.String(), nil
+	return client.PrintResult(resp), nil
 }
 
-// TODO(yee): diff output result and response result
 func diff(testName, expected, real string) {
 	expected = strings.TrimSpace(expected)
 	real = strings.TrimSpace(real)
 	if expected != real {
-		log.Printf("expected: %s, real: %s", expected, real)
+		log.Fatalf("expected:\n%s, real:\n%s", expected, real)
 	} else {
 		log.Printf("Test (%s) passed", testName)
 	}
