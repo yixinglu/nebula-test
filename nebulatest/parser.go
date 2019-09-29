@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/vesoft-inc/nebula-go/nebula"
+	nebula "github.com/vesoft-inc/nebula-go"
 )
 
 const (
@@ -81,7 +81,7 @@ func request(gql string, client *nebula.GraphClient) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return client.PrintResult(resp), nil
+	return PrintResult(resp), nil
 }
 
 func diff(testName, expected, real string) {
