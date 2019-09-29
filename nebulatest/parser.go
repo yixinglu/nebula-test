@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	nebula "github.com/vesoft-inc/nebula-go"
+	"github.com/vesoft-inc/nebula-go/graph"
 )
 
 const (
@@ -81,6 +82,11 @@ func request(gql string, client *nebula.GraphClient) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	if resp.GetErrorCode() != graph.ErrorCode_SUCCEEDED {
+		return "", errors.New(fmt.Sprintf("ErrorCode: %v, ErrorMsg: %s", resp.GetErrorCode(), resp.GetErrorMsg()))
+	}
+
 	return PrintResult(resp), nil
 }
 
