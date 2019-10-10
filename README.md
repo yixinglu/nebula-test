@@ -1,2 +1,3 @@
 # nebula-test
-Test framework for Nebula Graph project. https://github.com/vesoft-inc/nebula.git
+
+Test framework for [Nebula Graph](https://github.com/vesoft-inc/nebula.git) project.
