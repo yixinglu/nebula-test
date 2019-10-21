@@ -1,5 +1,7 @@
 FROM golang:1.13.2-alpine as builder
 
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.cn
 ENV NEBULA_TEST /home/nebula-test
 
 COPY . ${NEBULA_TEST}
@@ -7,6 +9,7 @@ COPY . ${NEBULA_TEST}
 WORKDIR ${NEBULA_TEST}
 
 RUN go build -o target/nebula-test . \
+  && mkdir -p /usr/local/nebula/bin/ \
   && cp target/nebula-test /usr/local/nebula/bin/nebula-test
 
 FROM golang:1.13.2-alpine
