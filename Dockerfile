@@ -12,14 +12,8 @@ RUN go build -o target/nebula-test . \
   && mkdir -p /usr/local/nebula/bin/ \
   && cp target/nebula-test /usr/local/nebula/bin/nebula-test
 
-FROM golang:1.13.2-alpine
+FROM alpine
 
-ENV NEBULA_HOME /usr/local/nebula/
+COPY --from=builder /usr/local/nebula/ /usr/local/nebula/
 
-COPY --from=builder ${NEBULA_HOME} ${NEBULA_HOME}
-
-WORKDIR ${NEBULA_HOME}
-
-ENV PATH ${NEBULA_HOME}/bin:${PATH}
-
-ENTRYPOINT ["nebula-test"]
+ENTRYPOINT ["/usr/local/nebula/bin/nebula-test"]
