@@ -9,11 +9,10 @@ COPY . ${NEBULA_TEST}
 WORKDIR ${NEBULA_TEST}
 
 RUN go build -o target/nebula-test . \
-  && mkdir -p /usr/local/nebula/bin/ \
-  && cp target/nebula-test /usr/local/nebula/bin/nebula-test
+  && cp target/nebula-test /usr/local/nebula-test
 
 FROM alpine
 
-COPY --from=builder /usr/local/nebula/ /usr/local/nebula/
+COPY --from=builder /usr/local/nebula-test /usr/local/bin/nebula-test
 
-ENTRYPOINT ["/usr/local/nebula/bin/nebula-test"]
+ENTRYPOINT ["nebula-test"]
