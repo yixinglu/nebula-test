@@ -18,7 +18,17 @@ const (
 	outPrefix  = "--- out"
 )
 
-func Parse(filename string, client *nebula.GraphClient) error {
+type Tester struct {
+	client *nebula.GraphClient
+}
+
+func NewTester(client *nebula.GraphClient) *Tester {
+	return &Tester{
+		client: client,
+	}
+}
+
+func (tester *Tester) Parse(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -50,7 +60,7 @@ func Parse(filename string, client *nebula.GraphClient) error {
 			isOutput = true
 
 			if isInput {
-				if respResult, err = request(inBuf.String(), client); err != nil {
+				if respResult, err = tester.request(inBuf.String()); err != nil {
 					return err
 				}
 				isInput = false
@@ -74,9 +84,9 @@ func Parse(filename string, client *nebula.GraphClient) error {
 	return nil
 }
 
-func request(gql string, client *nebula.GraphClient) (string, error) {
+func (tester *Tester) request(gql string) (string, error) {
 	gql = strings.TrimSpace(gql)
-	resp, err := client.Execute(gql)
+	resp, err := tester.client.Execute(gql)
 	if err != nil {
 		return "", err
 	}

@@ -32,7 +32,9 @@ func main() {
 	}
 	defer client.Disconnect()
 
-	if err = nt.Parse(*file, client); err != nil {
+	t := nt.NewTester(client)
+
+	if err = t.Parse(*file); err != nil {
 		log.Fatal(err)
 	}
 }
