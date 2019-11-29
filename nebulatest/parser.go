@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"strings"
 
 	nebula "github.com/vesoft-inc/nebula-go"
@@ -37,13 +38,16 @@ func (tester *Tester) Parse(filename string) error {
 	scanner := bufio.NewScanner(strings.NewReader(string(b)))
 	// TODO(yee): Use FSM to implement parse
 	var inBuf, outBuf bytes.Buffer
-	var respResult, testName string
+	var testName string
+	var response *graph.ExecutionResponse
+	var differ Differ
 	isInput, isOutput := false, false
 	for scanner.Scan() {
 		text := scanner.Text()
 		if strings.HasPrefix(text, testPrefix) {
 			if isOutput {
-				diff(testName, outBuf.String(), respResult)
+				differ.Diff(outBuf.String())
+				differ.PrintError(testName)
 				outBuf.Reset()
 				isOutput = false
 			}
@@ -60,8 +64,13 @@ func (tester *Tester) Parse(filename string) error {
 			isOutput = true
 
 			if isInput {
-				if respResult, err = tester.request(inBuf.String()); err != nil {
+				if response, err = tester.request(inBuf.String()); err != nil {
 					return err
+				}
+				if d, err := tester.newDiffer(text, response); err != nil {
+					return err
+				} else {
+					differ = d
 				}
 				isInput = false
 				inBuf.Reset()
@@ -77,33 +86,69 @@ func (tester *Tester) Parse(filename string) error {
 	}
 
 	if isOutput {
-		diff(testName, outBuf.String(), respResult)
+		differ.Diff(outBuf.String())
+		differ.PrintError(testName)
 		outBuf.Reset()
 	}
 
 	return nil
 }
 
-func (tester *Tester) request(gql string) (string, error) {
+func (tester *Tester) request(gql string) (*graph.ExecutionResponse, error) {
 	gql = strings.TrimSpace(gql)
 	resp, err := tester.client.Execute(gql)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if resp.GetErrorCode() != graph.ErrorCode_SUCCEEDED {
-		return "", fmt.Errorf("ErrorCode: %v, ErrorMsg: %s", resp.GetErrorCode(), resp.GetErrorMsg())
+		return nil, fmt.Errorf("ErrorCode: %v, ErrorMsg: %s", resp.GetErrorCode(), resp.GetErrorMsg())
 	}
 
-	return PrintResult(resp), nil
+	return resp, nil
 }
 
-func diff(testName, expected, real string) {
-	expected = strings.TrimSpace(expected)
-	real = strings.TrimSpace(real)
-	if expected != real {
-		log.Fatalf("expected:\n%s, real:\n%s", expected, real)
+func (tester *Tester) newDiffer(outText string, response *graph.ExecutionResponse) (Differ, error) {
+	dType, order := "table", false
+	config := outText[len(outPrefix):]
+	index := strings.Index(config, ":")
+	if index < 0 {
+		if differ, err := NewDiffer(response, dType, order); err != nil {
+			return nil, err
+		} else {
+			return differ, nil
+		}
 	} else {
-		log.Printf("Test (%s) passed", testName)
+		dType, order = tester.getOptions(config[index+1:])
+		if differ, err := NewDiffer(response, dType, order); err != nil {
+			return nil, err
+		} else {
+			return differ, nil
+		}
 	}
+}
+
+func (t *Tester) getOptions(config string) (dType string, order bool) {
+	options := strings.Split(config, ",")
+	dType = "table"
+	order = false
+	for _, op := range options {
+		if index := strings.Index(op, "="); index < 0 {
+			continue
+		}
+		kv := strings.Split(op, "=")
+		key := strings.ToLower(kv[0])
+		value := strings.ToLower(kv[1])
+		switch key {
+		case "type":
+			dType = value
+		case "order":
+			if b, err := strconv.ParseBool(value); err != nil {
+				log.Printf("Invalid order type: %s", kv[1])
+			} else {
+				order = b
+			}
+		}
+	}
+	return dType, order
 }

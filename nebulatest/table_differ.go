@@ -9,6 +9,22 @@ import (
 	"github.com/vesoft-inc/nebula-go/graph"
 )
 
+type TableDiffer struct {
+	DifferError
+	Response *graph.ExecutionResponse
+}
+
+func (d *TableDiffer) Diff(result string) {
+	real := printResult(d.Response)
+	result = strings.TrimSpace(result)
+	real = strings.TrimSpace(real)
+	if real != result {
+		d.err = fmt.Errorf("expected:\n%s, real:\n%s", result, real)
+	} else {
+		d.err = nil
+	}
+}
+
 const (
 	kColumnTypeEmpty = iota
 	kColumnTypeBool
@@ -24,7 +40,7 @@ const (
 	kColumnTypeDatetime
 )
 
-func PrintResult(response *graph.ExecutionResponse) string {
+func printResult(response *graph.ExecutionResponse) string {
 	widths, formats := computeColumnWidths(response)
 	if len(widths) == 0 {
 		return ""
