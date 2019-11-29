@@ -3,7 +3,6 @@ package nebulatest
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -42,7 +41,7 @@ func Parse(filename string, client *nebula.GraphClient) error {
 			// Reset test comment after last test output result
 			prefixLen := len(testPrefix)
 			if prefixLen > len(text) {
-				return errors.New(fmt.Sprintf("%s length is larger than %s", testPrefix, text))
+				return fmt.Errorf("%s length is larger than %s", testPrefix, text)
 			}
 			testName = strings.TrimSpace(text[prefixLen:])
 		} else if strings.HasPrefix(text, inPrefix) {
@@ -70,7 +69,6 @@ func Parse(filename string, client *nebula.GraphClient) error {
 	if isOutput {
 		diff(testName, outBuf.String(), respResult)
 		outBuf.Reset()
-		isOutput = false
 	}
 
 	return nil
@@ -84,7 +82,7 @@ func request(gql string, client *nebula.GraphClient) (string, error) {
 	}
 
 	if resp.GetErrorCode() != graph.ErrorCode_SUCCEEDED {
-		return "", errors.New(fmt.Sprintf("ErrorCode: %v, ErrorMsg: %s", resp.GetErrorCode(), resp.GetErrorMsg()))
+		return "", fmt.Errorf("ErrorCode: %v, ErrorMsg: %s", resp.GetErrorCode(), resp.GetErrorMsg())
 	}
 
 	return PrintResult(resp), nil
