@@ -18,20 +18,15 @@ func (d *JsonDiffer) Diff(result string) {
 	if err := json.Unmarshal([]byte(result), &resp); err != nil {
 		d.err = err
 	} else {
-		if d.Order {
-			if !d.compareInOrder(&resp) {
-				d.err = fmt.Errorf("Not equal")
-			} else {
-				d.err = nil
-			}
+		if !d.compare(&resp) {
+			d.err = fmt.Errorf("Not equal")
 		} else {
-			// TODO
 			d.err = nil
 		}
 	}
 }
 
-func (d *JsonDiffer) compareInOrder(result *graph.ExecutionResponse) bool {
+func (d *JsonDiffer) compare(result *graph.ExecutionResponse) bool {
 	if d.Response.GetErrorCode() != result.GetErrorCode() {
 		return false
 	}
@@ -62,9 +57,25 @@ func (d *JsonDiffer) compareInOrder(result *graph.ExecutionResponse) bool {
 	if len(d.Response.GetRows()) != len(result.GetRows()) {
 		return false
 	}
-	for i := range d.Response.GetRows() {
-		if !d.compareRowValue(d.Response.GetRows()[i], result.GetRows()[i]) {
-			return false
+
+	if d.Order {
+		for i := range d.Response.GetRows() {
+			if !d.compareRowValue(d.Response.GetRows()[i], result.GetRows()[i]) {
+				return false
+			}
+		}
+	} else {
+		for _, i := range d.Response.GetRows() {
+			found := false
+			for _, j := range result.GetRows() {
+				if d.compareRowValue(i, j) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
 		}
 	}
 
