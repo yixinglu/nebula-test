@@ -77,9 +77,17 @@ func (tester *Tester) Parse(filename string) error {
 			}
 		} else {
 			if isInput {
-				inBuf.WriteString(text)
+				if !strings.HasPrefix(text, "--") && !strings.HasPrefix(text, "#") && !strings.HasPrefix(text, "//") {
+					// text = fmt.Sprintf("%q", text)
+					text = strings.TrimRight(text, "\\ \"")
+					text = strings.TrimLeft(text, "\"")
+					inBuf.WriteString(text)
+				}
 			}
 			if isOutput {
+				if outBuf.Len() > 0 {
+					outBuf.WriteString("\n")
+				}
 				outBuf.WriteString(text)
 			}
 		}
@@ -110,21 +118,15 @@ func (tester *Tester) request(gql string) (*graph.ExecutionResponse, error) {
 
 func (tester *Tester) newDiffer(outText string, response *graph.ExecutionResponse) (Differ, error) {
 	dType, order := "table", false
-	config := outText[len(outPrefix):]
-	index := strings.Index(config, ":")
-	if index < 0 {
-		if differ, err := NewDiffer(response, dType, order); err != nil {
-			return nil, err
-		} else {
-			return differ, nil
-		}
+	index := strings.Index(outText, ",")
+	if index >= 0 {
+		index = strings.Index(outText, ":")
+		dType, order = tester.getOptions(outText[index+1:])
+	}
+	if differ, err := NewDiffer(response, dType, order); err != nil {
+		return nil, err
 	} else {
-		dType, order = tester.getOptions(config[index+1:])
-		if differ, err := NewDiffer(response, dType, order); err != nil {
-			return nil, err
-		} else {
-			return differ, nil
-		}
+		return differ, nil
 	}
 }
 
@@ -137,8 +139,8 @@ func (t *Tester) getOptions(config string) (dType string, order bool) {
 			continue
 		}
 		kv := strings.Split(op, "=")
-		key := strings.ToLower(kv[0])
-		value := strings.ToLower(kv[1])
+		key := strings.Trim(strings.ToLower(kv[0]), " ")
+		value := strings.Trim(strings.ToLower(kv[1]), " ")
 		switch key {
 		case "type":
 			dType = value
@@ -148,6 +150,8 @@ func (t *Tester) getOptions(config string) (dType string, order bool) {
 			} else {
 				order = b
 			}
+		default:
+			log.Fatalf("Unvalid key: %s", key)
 		}
 	}
 	return dType, order
