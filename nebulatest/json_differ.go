@@ -32,51 +32,56 @@ func (d *JsonDiffer) compare(result *graph.ExecutionResponse) error {
 	if d.Response.GetErrorCode() != result.GetErrorCode() {
 		return fmt.Errorf("ErrorCode: %v vs. %v", d.Response.GetErrorCode(), result.GetErrorCode())
 	}
-	// if d.Response.GetErrorMsg() != result.GetErrorMsg() {
-	// 	return fmt.Errorf("ErrorMsg: %s vs. %s", d.Response.GetErrorMsg(), result.GetErrorMsg())
-	// }
+	if result.IsSetErrorMsg() && d.Response.GetErrorMsg() != result.GetErrorMsg() {
+		return fmt.Errorf("ErrorMsg: %s vs. %s", d.Response.GetErrorMsg(), result.GetErrorMsg())
+	}
 
-	if d.Response.GetSpaceName() != result.GetSpaceName() {
+	if result.IsSetSpaceName() && d.Response.GetSpaceName() != result.GetSpaceName() {
 		return fmt.Errorf("SpaceName: %s vs. %s", d.Response.GetSpaceName(), result.GetSpaceName())
 	}
 
-	if len(d.Response.GetColumnNames()) != len(result.GetColumnNames()) {
-		return fmt.Errorf("Length of column names: %d vs. %d", d.Response.GetColumnNames(), result.GetColumnNames())
-	}
-	for _, rc := range d.Response.GetColumnNames() {
-		found := false
-		for _, ec := range result.GetColumnNames() {
-			if string(rc) == string(ec) {
-				found = true
-				break
-			}
+	if result.IsSetColumnNames() {
+		if len(d.Response.GetColumnNames()) != len(result.GetColumnNames()) {
+			return fmt.Errorf("Length of column names: %d vs. %d", len(d.Response.GetColumnNames()), len(result.GetColumnNames()))
 		}
-		if !found {
-			return fmt.Errorf("NotFoundColumnName: %s", string(rc))
-		}
-	}
 
-	if len(d.Response.GetRows()) != len(result.GetRows()) {
-		return fmt.Errorf("Number of rows: %d vs. %d", d.Response.GetRows(), result.GetRows())
-	}
-
-	if d.Order {
-		for i := range d.Response.GetRows() {
-			if !d.compareRowValue(d.Response.GetRows()[i], result.GetRows()[i]) {
-				return fmt.Errorf("Rows: %s vs. %s", d.Response.GetRows()[i].String(), result.GetRows()[i].String())
-			}
-		}
-	} else {
-		for _, i := range d.Response.GetRows() {
+		for _, rc := range d.Response.GetColumnNames() {
 			found := false
-			for _, j := range result.GetRows() {
-				if d.compareRowValue(i, j) {
+			for _, ec := range result.GetColumnNames() {
+				if string(rc) == string(ec) {
 					found = true
 					break
 				}
 			}
 			if !found {
-				return fmt.Errorf("NotFoundRow: %s", i)
+				return fmt.Errorf("NotFoundColumnName: %s", string(rc))
+			}
+		}
+	}
+
+	if result.IsSetRows() {
+		if len(d.Response.GetRows()) != len(result.GetRows()) {
+			return fmt.Errorf("Number of rows: %d vs. %d", d.Response.GetRows(), result.GetRows())
+		}
+
+		if d.Order {
+			for i := range d.Response.GetRows() {
+				if !d.compareRowValue(d.Response.GetRows()[i], result.GetRows()[i]) {
+					return fmt.Errorf("Rows: %s vs. %s", d.Response.GetRows()[i].String(), result.GetRows()[i].String())
+				}
+			}
+		} else {
+			for _, i := range d.Response.GetRows() {
+				found := false
+				for _, j := range result.GetRows() {
+					if d.compareRowValue(i, j) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return fmt.Errorf("NotFoundRow: %s", i)
+				}
 			}
 		}
 	}

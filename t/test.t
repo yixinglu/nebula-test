@@ -58,7 +58,7 @@ YIELD $$.player.name AS Teammate, $$.player.age AS Age;
     {
 		  "columns": [
         {
-				"str": "Tony Parker"
+          "str": "Tony Parker"
         },
         {
           "integer": 36
@@ -66,4 +66,11 @@ YIELD $$.player.name AS Teammate, $$.player.age AS Age;
       ]
     }
   ]
+}
+=== test: Yield
+--- in
+YIELD 10
+--- out: type=json, order=false
+{
+  "error_code": 0
 }

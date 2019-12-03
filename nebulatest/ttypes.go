@@ -40,45 +40,50 @@ func (e *executionResponse) convertToNebulaResponse() *graph.ExecutionResponse {
 		ErrorMsg:    e.ErrorMsg,
 		SpaceName:   e.SpaceName,
 	}
-	resp.ColumnNames = make([][]byte, len(e.ColumnNames))
-	for i := range e.ColumnNames {
-		resp.ColumnNames[i] = []byte(e.ColumnNames[i])
-	}
-	resp.Rows = make([]*graph.RowValue, len(e.Rows))
-	for i := range e.Rows {
-		var row graph.RowValue
-		row.Columns = make([]*graph.ColumnValue, len(e.Rows[i].Columns))
-		for j := range e.Rows[i].Columns {
-			c := e.Rows[i].Columns[j]
-			var column graph.ColumnValue
-			if c.Str != nil {
-				column.Str = []byte(*c.Str)
-			} else if c.BoolVal != nil {
-				column.BoolVal = c.BoolVal
-			} else if c.Integer != nil {
-				column.Integer = c.Integer
-			} else if c.Id != nil {
-				column.Id = c.Id
-			} else if c.SinglePrecision != nil {
-				column.SinglePrecision = c.SinglePrecision
-			} else if c.DoublePrecision != nil {
-				column.DoublePrecision = c.DoublePrecision
-			} else if c.Timestamp != nil {
-				column.Timestamp = c.Timestamp
-			} else if c.Year != nil {
-				column.Year = c.Year
-			} else if c.Month != nil {
-				column.Month = c.Month
-			} else if c.Date != nil {
-				column.Date = c.Date
-			} else if c.Datetime != nil {
-				column.Datetime = c.Datetime
-			} else {
-				log.Println("Error column value")
-			}
-			row.Columns[j] = &column
+	if len(e.ColumnNames) > 0 {
+		resp.ColumnNames = make([][]byte, len(e.ColumnNames))
+		for i := range e.ColumnNames {
+			resp.ColumnNames[i] = []byte(e.ColumnNames[i])
 		}
-		resp.Rows[i] = &row
+	}
+
+	if len(e.Rows) > 0 {
+		resp.Rows = make([]*graph.RowValue, len(e.Rows))
+		for i := range e.Rows {
+			var row graph.RowValue
+			row.Columns = make([]*graph.ColumnValue, len(e.Rows[i].Columns))
+			for j := range e.Rows[i].Columns {
+				c := e.Rows[i].Columns[j]
+				var column graph.ColumnValue
+				if c.Str != nil {
+					column.Str = []byte(*c.Str)
+				} else if c.BoolVal != nil {
+					column.BoolVal = c.BoolVal
+				} else if c.Integer != nil {
+					column.Integer = c.Integer
+				} else if c.Id != nil {
+					column.Id = c.Id
+				} else if c.SinglePrecision != nil {
+					column.SinglePrecision = c.SinglePrecision
+				} else if c.DoublePrecision != nil {
+					column.DoublePrecision = c.DoublePrecision
+				} else if c.Timestamp != nil {
+					column.Timestamp = c.Timestamp
+				} else if c.Year != nil {
+					column.Year = c.Year
+				} else if c.Month != nil {
+					column.Month = c.Month
+				} else if c.Date != nil {
+					column.Date = c.Date
+				} else if c.Datetime != nil {
+					column.Datetime = c.Datetime
+				} else {
+					log.Println("Error column value")
+				}
+				row.Columns[j] = &column
+			}
+			resp.Rows[i] = &row
+		}
 	}
 	return &resp
 }
