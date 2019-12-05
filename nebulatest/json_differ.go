@@ -17,7 +17,7 @@ func (d *JsonDiffer) Diff(result string) {
 	// result = fmt.Sprintf("%q", result)
 	var resp executionResponse
 	if err := json.Unmarshal([]byte(result), &resp); err != nil {
-		d.err = err
+		d.err = fmt.Errorf("Fail to parse JSON string, error: %s", err.Error())
 	} else {
 		r := resp.convertToNebulaResponse()
 		if err = d.compare(r); err != nil {
