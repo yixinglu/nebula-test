@@ -130,7 +130,8 @@ func (tester *Tester) newDiffer(outText string, response *graph.ExecutionRespons
 		index = strings.Index(outText, ":")
 		dType, order = tester.getOptions(outText[index+1:])
 	}
-	if differ, err := NewDiffer(response, dType, order); err != nil {
+	// TODO: Now only support JSON parser
+	if differ, err := NewDiffer(response, "json", order); err != nil {
 		return nil, err
 	} else {
 		return differ, nil
