@@ -1,12 +1,31 @@
 # 集成测试
 
-Nebula Test 工具用来读取自定义的[测试文件](t/test.t)，然后逐个解析每段的测试用例的输入，向 [Nebula](https://github.com/vesoft-inc/nebula) 服务端发起请求，然后比对
-请求后的响应和测试用例中的输出是否一致，进而完成集成测试的目的。
+Nebula Test 工具用来读取自定义的[测试文件](t/test.t)，然后逐个解析每段的测试用例的输入，向 [Nebula](https://github.com/vesoft-inc/nebula) 服务端发起请求，然后比对请求后的响应和测试用例中的输出是否一致，进而完成集成测试的目的。
 
-## 参考的设计：
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
 
-1. [twitter/mysql-test](https://github.com/twitter-forks/mysql/tree/master/mysql-test) 
-1. [openresty/test-nginx](https://openresty.gitbooks.io/programming-openresty/content/testing/test-file-layout.html) 
+- [Nebula Test 使用方式](#nebula-test-使用方式)
+- [用例](#用例)
+    - [1. 测试用例 Title 和 Description](#1-测试用例-title-和-description)
+        - [1.1 前缀标识](#11-前缀标识)
+        - [1.2 解释](#12-解释)
+        - [1.3 完整示例](#13-完整示例)
+    - [2. 测试用例输入](#2-测试用例输入)
+        - [2.1 前缀标识](#21-前缀标识)
+        - [2.2 解释](#22-解释)
+        - [2.3 完整示例](#23-完整示例)
+    - [3. 测试用例输出](#3-测试用例输出)
+        - [3.1 前缀标识](#31-前缀标识)
+        - [3.2 解释](#32-解释)
+        - [3.3 完整示例](#33-完整示例)
+        - [3.4 Column Type](#34-column-type)
+- [测试用例的编写](#测试用例的编写)
+- [参考](#参考)
+- [TODO](#todo)
+
+<!-- markdown-toc end -->
+
 
 ## Nebula Test 使用方式
 
@@ -334,6 +353,11 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 
 - 不同的模块按测试文件（以 `.t` 结尾）划分，作为一个 test suits。
 - 不同测试文件尽量自包含，即可拿该文件独立运行，不依赖其他测试文件的执行顺序。数据也可以尽量的自包含（在测试的开始自行创建独立的 SPACE 和 INSERT 需要的数据）。
+
+## 参考
+
+1. [twitter/mysql-test](https://github.com/twitter-forks/mysql/tree/master/mysql-test) 
+1. [openresty/test-nginx](https://openresty.gitbooks.io/programming-openresty/content/testing/test-file-layout.html) 
 
 ## TODO
 
