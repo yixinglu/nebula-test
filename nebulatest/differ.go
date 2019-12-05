@@ -2,7 +2,6 @@ package nebulatest
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/vesoft-inc/nebula-go/graph"
@@ -10,7 +9,6 @@ import (
 
 type Differ interface {
 	Diff(result string)
-	PrintError(prefix string)
 	Error() error
 }
 
@@ -20,14 +18,6 @@ type DifferError struct {
 
 func (d *DifferError) Error() error {
 	return d.err
-}
-
-func (d *DifferError) PrintError(testName string) {
-	if d.err != nil {
-		log.Printf("Test (%s) fails.\n%s", testName, d.err.Error())
-	} else {
-		log.Printf("Test (%s) passed.", testName)
-	}
 }
 
 func NewDiffer(resp *graph.ExecutionResponse, dType string, order bool) (Differ, error) {

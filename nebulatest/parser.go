@@ -22,6 +22,7 @@ const (
 
 type Tester struct {
 	client *nebula.GraphClient
+	err    error
 }
 
 func NewTester(client *nebula.GraphClient) *Tester {
@@ -30,10 +31,11 @@ func NewTester(client *nebula.GraphClient) *Tester {
 	}
 }
 
-func (tester *Tester) Parse(filename string) error {
+func (tester *Tester) Parse(filename string) {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		log.Printf("Invalid file: %s", filename)
+		return
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(string(b)))
@@ -49,35 +51,33 @@ func (tester *Tester) Parse(filename string) error {
 		if strings.HasPrefix(text, testPrefix) {
 			if isOutput {
 				differ.Diff(outBuf.String())
-				differ.PrintError(testName)
+				if tester.err == nil && differ.Error() != nil {
+					tester.err = differ.Error()
+				}
+				tester.printResult(testName)
 				outBuf.Reset()
 				isOutput = false
 			}
 
-			// Reset test comment after last test output result
 			prefixLen := len(testPrefix)
-			if prefixLen > len(text) {
-				return fmt.Errorf("%s length is larger than %s", testPrefix, text)
-			}
 			testName = strings.TrimLeft(strings.TrimSpace(text[prefixLen:]), ": ")
 		} else if strings.HasPrefix(text, inPrefix) {
 			isInput = true
 			w := strings.TrimLeft(strings.TrimSpace(text[len(inPrefix):]), ": ")
-			if wait, err = tester.parseInputWait(w); err != nil {
-				return err
-			}
+			wait = tester.parseInputWait(w)
 		} else if strings.HasPrefix(text, outPrefix) {
 			isOutput = true
 
 			if isInput {
 				time.Sleep(wait)
 				if response, err = tester.request(inBuf.String()); err != nil {
-					return err
-				}
-				if d, err := tester.newDiffer(text, response); err != nil {
-					return err
+					tester.err = err
 				} else {
-					differ = d
+					if d, err := tester.newDiffer(text, response); err != nil {
+						tester.err = err
+					} else {
+						differ = d
+					}
 				}
 				isInput = false
 				inBuf.Reset()
@@ -102,11 +102,12 @@ func (tester *Tester) Parse(filename string) error {
 
 	if isOutput {
 		differ.Diff(outBuf.String())
-		differ.PrintError(testName)
+		if tester.err == nil && differ.Error() != nil {
+			tester.err = differ.Error()
+		}
+		tester.printResult(testName)
 		outBuf.Reset()
 	}
-
-	return nil
 }
 
 func (tester *Tester) request(gql string) (*graph.ExecutionResponse, error) {
@@ -130,6 +131,8 @@ func (tester *Tester) newDiffer(outText string, response *graph.ExecutionRespons
 		index = strings.Index(outText, ":")
 		dType, order = tester.getOptions(outText[index+1:])
 	}
+	dType = "json"
+	// TODO: Now only support JSON parser
 	if differ, err := NewDiffer(response, dType, order); err != nil {
 		return nil, err
 	} else {
@@ -164,14 +167,30 @@ func (t *Tester) getOptions(config string) (dType string, order bool) {
 	return dType, order
 }
 
-func (t *Tester) parseInputWait(s string) (time.Duration, error) {
+func (t *Tester) parseInputWait(s string) time.Duration {
 	if len(s) == 0 {
-		return time.ParseDuration("0s")
+		d, _ := time.ParseDuration("0s")
+		return d
 	}
 	kv := strings.Split(s, "=")
 	if len(kv) != 2 || strings.ToLower(kv[0]) != "wait" {
 		log.Println("Invalid option format, like wait=10s")
-		return time.ParseDuration("0s")
+		d, _ := time.ParseDuration("0s")
+		return d
 	}
-	return time.ParseDuration(strings.TrimSpace(kv[1]))
+	if d, err := time.ParseDuration(strings.TrimSpace(kv[1])); err != nil {
+		log.Printf("Error wait format: %s", kv[1])
+		d, _ = time.ParseDuration("0s")
+		return d
+	} else {
+		return d
+	}
+}
+
+func (t *Tester) printResult(testName string) {
+	if t.err != nil {
+		log.Printf("Test (%s) fails.\n%s", testName, t.err.Error())
+	} else {
+		log.Printf("Test (%s) passed.", testName)
+	}
 }

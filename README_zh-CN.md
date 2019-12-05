@@ -71,7 +71,7 @@ INSERT EDGE serve(start_year, end_year) VALUES 101 -> 201:(1999, 2018);
 { "error_code": 0 }
 
 
-=== test: Another: find the vertex that VID 100 follows, whose age is greater than 35
+=== test: find the vertex that VID 100 follows, whose age is greater than 35
 Firstly
 Secondly
 More description is ok.

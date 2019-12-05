@@ -32,7 +32,5 @@ func main() {
 
 	t := nt.NewTester(client)
 
-	if err = t.Parse(*file); err != nil {
-		log.Fatal(err)
-	}
+	t.Parse(*file)
 }
