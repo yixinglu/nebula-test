@@ -8,13 +8,14 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	nebula "github.com/vesoft-inc/nebula-go"
 	"github.com/vesoft-inc/nebula-go/graph"
 )
 
 const (
-	testPrefix = "=== test:"
+	testPrefix = "=== test"
 	inPrefix   = "--- in"
 	outPrefix  = "--- out"
 )
@@ -41,6 +42,7 @@ func (tester *Tester) Parse(filename string) error {
 	var testName string
 	var response *graph.ExecutionResponse
 	var differ Differ
+	var wait time.Duration
 	isInput, isOutput := false, false
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -57,13 +59,18 @@ func (tester *Tester) Parse(filename string) error {
 			if prefixLen > len(text) {
 				return fmt.Errorf("%s length is larger than %s", testPrefix, text)
 			}
-			testName = strings.TrimSpace(text[prefixLen:])
+			testName = strings.TrimLeft(strings.TrimSpace(text[prefixLen:]), ": ")
 		} else if strings.HasPrefix(text, inPrefix) {
 			isInput = true
+			w := strings.TrimLeft(strings.TrimSpace(text[len(inPrefix):]), ": ")
+			if wait, err = tester.parseInputWait(w); err != nil {
+				return err
+			}
 		} else if strings.HasPrefix(text, outPrefix) {
 			isOutput = true
 
 			if isInput {
+				time.Sleep(wait)
 				if response, err = tester.request(inBuf.String()); err != nil {
 					return err
 				}
@@ -155,4 +162,16 @@ func (t *Tester) getOptions(config string) (dType string, order bool) {
 		}
 	}
 	return dType, order
+}
+
+func (t *Tester) parseInputWait(s string) (time.Duration, error) {
+	if len(s) == 0 {
+		return time.ParseDuration("0s")
+	}
+	kv := strings.Split(s, "=")
+	if len(kv) != 2 || strings.ToLower(kv[0]) != "wait" {
+		log.Println("Invalid option format, like wait=10s")
+		return time.ParseDuration("0s")
+	}
+	return time.ParseDuration(strings.TrimSpace(kv[1]))
 }
