@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	nebula "github.com/vesoft-inc/nebula-go"
@@ -11,10 +10,9 @@ import (
 
 func main() {
 	file := flag.String("file", "", "Test file path")
-	username := flag.String("username", "user", "Nebula username")
+	username := flag.String("user", "user", "Nebula username")
 	password := flag.String("password", "password", "Nebula password")
-	address := flag.String("address", "127.0.0.1", "Nebula Graph server ip address")
-	port := flag.Int64("port", 3699, "Nebula Graph server ip port")
+	address := flag.String("address", "127.0.0.1:3699", "Nebula Graph server ip address and port")
 	flag.Parse()
 
 	if *file == "" {
@@ -22,7 +20,7 @@ func main() {
 		return
 	}
 
-	client, err := nebula.NewClient(fmt.Sprintf("%s:%d", *address, *port))
+	client, err := nebula.NewClient(*address)
 	if err != nil {
 		log.Fatal(err)
 	}
