@@ -117,13 +117,13 @@ GO FROM 100 OVER follow WHERE $$.player.age >= 35 \
 YIELD $$.player.name AS Teammate, $$.player.age AS Age;
 --- out: type=json, order=false
 {
-	"error_code": 0,
-	"error_msg": "",
-	"column_names": ["Teammate", "Age"],
-	"space_name": "nba",
-	"rows": [
+  "error_code": 0,
+  "error_msg": "",
+  "column_names": ["Teammate", "Age"],
+  "space_name": "nba",
+  "rows": [
     {
-		  "columns": [
+      "columns": [
         { "str": "Tony Parker" },
         { "integer": 36 }
       ]
@@ -214,12 +214,12 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 
 时间的单位：
 
-- `h` : hours
-- `m` : minutes
-- `s` : seconds
-- `ms` : milliseconds
-- `us` : microseconds
-- `ns` : nanoseconds
+- `h`: hours
+- `m`: minutes
+- `s`: seconds
+- `ms`: milliseconds
+- `us`: microseconds
+- `ns`: nanoseconds
 
 #### 2.3 完整示例
 
@@ -309,19 +309,19 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 ```text
 --- out: type=json, order=true
 {
-	"error_code": 0,
-	"error_msg": "",
-	"column_names": ["player.name", "player.age"],
-	"space_name": "nba",
-	"rows": [
+  "error_code": 0,
+  "error_msg": "",
+  "column_names": ["player.name", "player.age"],
+  "space_name": "nba",
+  "rows": [
     {
-		  "columns": [
+      "columns": [
         { "str": "Tim Duncan" },
         { "integer": 42 }
       ]
     },
     {
-		  "columns": [
+      "columns": [
         { "str": "Tony Parker" },
         { "integer": 36 }
       ]
