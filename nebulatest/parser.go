@@ -124,7 +124,7 @@ func (tester *Tester) request(gql string) (*graph.ExecutionResponse, error) {
 }
 
 func (tester *Tester) newDiffer(outText string, response *graph.ExecutionResponse) (Differ, error) {
-	dType, order := "table", false
+	dType, order := "json", false
 	index := strings.Index(outText, ",")
 	if index >= 0 {
 		index = strings.Index(outText, ":")

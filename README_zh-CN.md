@@ -54,6 +54,10 @@ INSERT VERTEX team(name) VALUES 200:("Warriors");
 INSERT VERTEX team(name) VALUES 201:("Nuggets");
 INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 --- out
+{
+  "error_code": 0,
+  "space_name": "nba"
+}
 
 
 === test: insert edges
@@ -64,48 +68,7 @@ INSERT EDGE follow(degree) VALUES 100 -> 101:(95), \
 INSERT EDGE serve(start_year, end_year) VALUES 100 -> 200:(1997, 2016);
 INSERT EDGE serve(start_year, end_year) VALUES 101 -> 201:(1999, 2018);
 --- out
-
-
-=== test: fetch vertex props
---- in
-FETCH PROP ON player 100;
---- out
-============================
-| player.name | player.age |
-============================
-| Tim Duncan  | 42         |
-----------------------------
-
-
-=== test: Yet: fetch vertex props
---- in
-FETCH PROP ON player 100;
---- out: type=row, order=false
-player.name	player.age
-Tim Duncan	42
-
-
-=== test: fetch edge props
---- in
-FETCH PROP ON serve 100 -> 200;
---- out
-=====================================
-| serve.start_year | serve.end_year |
-=====================================
-| 1997             | 2016           |
--------------------------------------
-
-
-=== test: Find the vertex that VID 100 follows, whose age is greater than 35
---- in
-GO FROM 100 OVER follow WHERE $$.player.age >= 35 \
-YIELD $$.player.name AS Teammate, $$.player.age AS Age;
---- out
-=====================
-| Teammate    | Age |
-=====================
-| Tony Parker | 36  |
----------------------
+{ "error_code": 0 }
 
 
 === test: Another: find the vertex that VID 100 follows, whose age is greater than 35
@@ -115,7 +78,7 @@ More description is ok.
 --- in
 GO FROM 100 OVER follow WHERE $$.player.age >= 35 \
 YIELD $$.player.name AS Teammate, $$.player.age AS Age;
---- out: type=json, order=false
+--- out: order=false
 {
   "error_code": 0,
   "error_msg": "",
@@ -247,13 +210,37 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 
 **选项**： 用来配置输出结果的比较方式。
 
-- `type`: 表示下面结果的格式，有如下三种值：
-  - `table`: 表格形式，跟 nebula console 中的输出一致，为**默认值**。
+- `type`: 表示下面结果的格式，有如下取值：
+  - `json`: JSON 格式，其中的字段参考 [graph.thrift](https://github.com/vesoft-inc/nebula/blob/master/src/interface/graph.thrift#L107-L114) 定义，为**默认值**。
+
+    如下示例所示，其中除却 `error_code` 之外的其他字段都是**可选**，即如果结果中没有给出，则会忽略该字段。
+
+    示例：
+
+    ```json
+    --- out
+    {
+      "error_code": 0,
+      "error_msg": "",
+      "column_names": ["player.name", "player.age"],
+      "space_name": "nba",
+      "rows": [
+        {
+          "columns": [
+            { "str": "Tim Duncan" },
+            { "integer": 42 }
+          ]
+        }
+      ]
+    }
+    ```
+<!--
+  - `table`: 表格形式，必须跟 nebula console 中的输出一致。
 
     示例：
 
     ```text
-    --- out
+    --- out: type=table
     ============================
     | player.name | player.age |
     ============================
@@ -270,29 +257,7 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
     player.name	player.age
     Tim Duncan	42
     ```
-
-  - `json`: JSON 格式，其中的字段参考 [graph.thrift](https://github.com/vesoft-inc/nebula/blob/master/src/interface/graph.thrift#L107-L114) 定义。
-    如下示例所示，其中除却 `error_code` 之外的其他字段都是**可选**，即如果结果中没有给出，则会忽略该字段。
-
-    示例：
-
-    ```json
-    --- out: type=json
-    {
-      "error_code": 0,
-      "error_msg": "",
-      "column_names": ["player.name", "player.age"],
-      "space_name": "nba",
-      "rows": [
-        {
-          "columns": [
-            { "str": "Tim Duncan" },
-            { "integer": 42 }
-          ]
-        }
-      ]
-    }
-    ```
+-->
 
 - `order`: 表示输出行是否需要经过排序，如果是排序后的结果，则严格按照给出的顺序比较。只有两种取值。
   - `false`: 结果不排序，默认值。
@@ -307,7 +272,7 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 #### 3.3 完整示例
 
 ```text
---- out: type=json, order=true
+--- out: order=true
 {
   "error_code": 0,
   "error_msg": "",
