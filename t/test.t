@@ -1,4 +1,6 @@
 === test: insert vertices
+More description,
+New line test.
 --- in
 USE nba;
 INSERT VERTEX player(name, age) VALUES 100:("Tim Duncan", 42), \
@@ -9,7 +11,7 @@ INSERT VERTEX team(name) VALUES 201:("Nuggets");
 INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
 --- out
 === test: insert edges
---- in
+--- in: wait=5s
 INSERT EDGE follow(degree) VALUES 100 -> 101:(95), \
  100 -> 102:(90), \
  102 -> 101:(75);
