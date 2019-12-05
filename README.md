@@ -1,5 +1,7 @@
 # nebula-test
 
+[中文](README_zh-CN.md)
+
 Test framework for [Nebula Graph](https://github.com/vesoft-inc/nebula.git) project.
 
 ## Format
