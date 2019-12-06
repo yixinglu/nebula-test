@@ -1,10 +1,28 @@
+=== test: create space sp
+--- in
+-- DROP SPACE nba;
+CREATE SPACE IF NOT EXISTS nba(partition_num=128, replica_factor=1);
+--- out
+{ "error_code": 0 }
+
+
+=== test: use space nba
+--- in
+USE nba;
+CREATE TAG IF NOT EXISTS player (name string, age int);
+CREATE TAG IF NOT EXISTS team (name string);
+CREATE EDGE IF NOT EXISTS follow(degree int);
+CREATE EDGE IF NOT EXISTS serve(start_year int, end_year int);
+--- out
+{ "error_code": 0 }
+
+
 === test: empty test
 
 === test: insert vertices
 More description,
 New line test.
---- in: wait=3s
-USE nba;
+--- in: wait=10s
 INSERT VERTEX player(name, age) VALUES 100:("Tim Duncan", 42), \
  101:("Tony Parker", 36), \
  102:("LaMarcus Aldridge", 33);
@@ -17,8 +35,9 @@ INSERT VERTEX player(name, age) VALUES 121:("Useless", 60);
   "space_name": "nba"
 }
 
+
 === test: insert edges
---- in: wait=5s
+--- in:
 INSERT EDGE follow(degree) VALUES 100 -> 101:(95), \
  100 -> 102:(90), \
  102 -> 101:(75);

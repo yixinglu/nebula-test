@@ -72,6 +72,7 @@ func (tester *Tester) Parse(filename string) {
 			if isInput {
 				time.Sleep(wait)
 				if response, err = tester.request(inBuf.String()); err != nil {
+					log.Printf("Failed nGQL statment: %s", inBuf.String())
 					tester.err = err
 				} else {
 					if d, err := tester.newDiffer(text, response); err != nil {
