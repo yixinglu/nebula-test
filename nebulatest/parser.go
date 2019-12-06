@@ -57,6 +57,7 @@ func (tester *Tester) Parse(filename string) {
 				tester.printResult(testName)
 				outBuf.Reset()
 				isOutput = false
+				tester.err = nil
 			}
 
 			prefixLen := len(testPrefix)
@@ -107,6 +108,7 @@ func (tester *Tester) Parse(filename string) {
 		}
 		tester.printResult(testName)
 		outBuf.Reset()
+		tester.err = nil
 	}
 }
 
